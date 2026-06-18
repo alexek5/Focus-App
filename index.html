@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- iOS meta tags for PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Focus App">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>Focus App</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-color: #111;
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    button {
+      padding: 16px 32px;
+      font-size: 18px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #555;
+    }
+    #statusText {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #fff;
+      font-size: 14px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <button id="notifyBtn">Send Test Notification</button>
+  <div id="statusText">Status: Default</div>
+
+  <script>
+    // Check for Notification API support
+    if ('Notification' in window) {
+      // Request permission if default
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          updateStatus(permission);
+        });
+      }
+
+      // Update status display
+      function updateStatus(permission) {
+        const statusText = document.getElementById('statusText');
+        statusText.textContent = `Status: ${permission}`;
+      }
+
+      // Button click handler
+      document.getElementById('notifyBtn').addEventListener('click', async () => {
+        if (Notification.permission === 'granted') {
+          // Show notification through service worker
+          const registration = await navigator.serviceWorker.ready;
+          registration.showNotification('Welcome to your Focus App!');
+        } else if (Notification.permission === 'default') {
+          // Request permission then show notification if granted
+          const permission = await Notification.requestPermission();
+          updateStatus(permission);
+          if (permission === 'granted') {
+            const registration = await navigator.serviceWorker.ready;
+            registration.showNotification('Welcome to your Focus App!');
+          } else {
+            alert('Notification permission was not granted');
+          }
+        } else {
+          alert('Please grant notification permission first');
+        }
+      });
+
+      // Show welcome notification on load if permission granted
+      window.addEventListener('load', () => {
+        if (Notification.permission === 'granted') {
+          new Notification('Welcome to your Focus App!');
+        }
+      });
+    } else {
+      // Fallback: alert
+      alert('Notifications are not supported in this browser.');
+    }
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
