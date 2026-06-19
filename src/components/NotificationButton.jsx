@@ -1,25 +1,36 @@
-import { useNotifications } from "../hooks/useNotifications";
-
 export default function NotificationButton() {
-  const { permission, requestPermission, sendNotification } =
-    useNotifications();
 
   async function handleClick() {
-    if (permission !== "granted") {
-      const result = await requestPermission();
-      if (result !== "granted") return;
-    }
+    try {
+      if (!("Notification" in window)) {
+        alert("Notifications not supported");
+        return;
+      }
 
-    sendNotification("Welcome to your Focus App!");
+      const permission = await Notification.requestPermission();
+
+      if (permission !== "granted") return;
+
+      if ("serviceWorker" in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration();
+
+        if (reg) {
+          reg.showNotification("Hello from Focus App");
+        } else {
+          new Notification("Hello from Focus App");
+        }
+      } else {
+        new Notification("Hello from Focus App");
+      }
+
+    } catch (err) {
+      console.log("Notification error:", err);
+    }
   }
 
   return (
-    <div>
-      <button onClick={handleClick}>
-        Test Notification
-      </button>
-
-      <p>Status: {permission}</p>
-    </div>
+    <button onClick={handleClick}>
+      Send Notification
+    </button>
   );
 }
