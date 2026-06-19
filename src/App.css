@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+  background: #111;
+  color: white;
+  font-family: system-ui;
+}
+
+.app {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+button {
+  padding: 16px 32px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
